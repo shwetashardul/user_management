@@ -11,7 +11,7 @@ This guide will walk you through the process of using Docker Compose to manage a
 
 ### Starting the Services
 - To start all services defined in the Docker Compose file, navigate to the directory containing your `docker-compose.yml` file and run:
-  - **`docker-compose up -d`**
+`**
   - This command starts the containers in the background.
 
 ### Accessing PgAdmin
