@@ -6,8 +6,8 @@ from app.services.user_service import UserService  # Adjust import according to 
 from app.models.user_model import User  # Adjust import according to your actual path
 
 @pytest.mark.asyncio
-@patch('your_module_path.user_service.UserService._execute_query')  # Correct the path
-@patch('your_module_path.user_service.UserService.get_by_id')  # Correct the path
+@patch('app.services.user_service.UserService._execute_query')  # Correct the path
+@patch('app.services.user_service.UserService.get_by_id')  # Correct the path
 async def test_update_profile_picture_url_success(mock_get_by_id, mock_execute_query):
     # Mock the async session and other service functions
     session = AsyncMock()
@@ -27,8 +27,8 @@ async def test_update_profile_picture_url_success(mock_get_by_id, mock_execute_q
     session.refresh.assert_called_once_with(user)
 
 @pytest.mark.asyncio
-@patch('your_module_path.user_service.UserService._execute_query')  # Correct the path
-@patch('your_module_path.user_service.UserService.get_by_id')  # Correct the path
+@patch('app.services.user_service.UserService._execute_query')  # Correct the path
+@patch('app.services.user_service.UserService.get_by_id')  # Correct the path
 async def test_update_profile_picture_url_no_user(mock_get_by_id, mock_execute_query):
     session = AsyncMock()
     user_id = UUID("12345678-1234-5678-1234-567812345678")
@@ -43,8 +43,8 @@ async def test_update_profile_picture_url_no_user(mock_get_by_id, mock_execute_q
     mock_get_by_id.assert_called_once_with(session, user_id)
 
 @pytest.mark.asyncio
-@patch('your_module_path.user_service.UserService._execute_query')  # Adjust
-@patch('your_module_path.user_service.UserService.get_by_id')  # Adjust
+@patch('app.services.user_service.UserService._execute_query')  # Adjust
+@patch('app.services.user_service.UserService.get_by_id')  # Adjust
 async def test_update_profile_picture_url_failure(mock_get_by_id, mock_execute_query):
     session = AsyncMock()
     user_id = UUID("12345678-1234-5678-1234-567812345678")
