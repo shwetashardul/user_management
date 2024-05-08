@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from fastapi import UploadFile
 from minio.error import S3Error
-from your_module.minio_service import MinioService  # Adjust import according to your project structure
+from app.services.minio_service import MinioService  # Adjust import according to your project structure
 
 @pytest.fixture
 def minio_client_mock():
