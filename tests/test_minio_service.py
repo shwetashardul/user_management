@@ -6,7 +6,7 @@ from app.services.minio_service import MinioService  # Adjust import according t
 
 @pytest.fixture
 def minio_client_mock():
-    with patch('your_module.minio_service.Minio') as mock:
+    with patch('app.services.minio_service.Minio') as mock:
         yield mock()
 
 @pytest.fixture
