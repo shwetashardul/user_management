@@ -34,6 +34,7 @@ from app.utils.link_generation import create_user_links, generate_pagination_lin
 from app.dependencies import get_settings
 from app.services.email_service import EmailService
 from app.services.minio_service import MinioService 
+
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
@@ -49,13 +50,13 @@ async def upload_profile_picture(user_id: UUID, file: UploadFile = File(...), db
     if not await UserService.exists_by_id(db, user_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
-    url = await MinioService.upload_file(file)  # Assuming MinioService has a method to handle file upload
-    updated_user = await UserService.update_profile_picture_url(db, user_id, url)
+    url = await minio_service.upload_file(file)  # Upload file to Minio and retrieve URL
+    updated_user = await UserService.update_profile_picture_url(db, user_id, url)  # Update user's profile with new URL
     
     if not updated_user:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update user profile")
     
-    return {"url": url}
+    return {"url": url, "message": "Profile picture updated successfully"}
 
 @router.get("/users/{user_id}", response_model=UserResponse, name="get_user", tags=["User Management Requires (Admin or Manager Roles)"])
 async def get_user(user_id: UUID, request: Request, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
