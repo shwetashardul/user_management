@@ -2,8 +2,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from sqlalchemy.exc import SQLAlchemyError
 from uuid import UUID
-from .services.user_service import UserService  # Adjust import according to your actual path
-from .models.user_model import User  # Adjust import according to your actual path
+from app.services.user_service import UserService  # Adjust import according to your actual path
+from app.models.user_model import User  # Adjust import according to your actual path
 
 @pytest.mark.asyncio
 @patch('your_module_path.user_service.UserService._execute_query')  # Correct the path
