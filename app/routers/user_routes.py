@@ -21,7 +21,7 @@ Key Highlights:
 from builtins import dict, int, len, str
 from datetime import timedelta
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Request, UploadFile, File
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_current_user, get_db, get_email_service, require_role
@@ -40,7 +40,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
 
 @router.post("/users/{user_id}/upload-profile-picture", tags=["User Management"])
-async def upload_profile_picture(user_id: UUID, file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
+async def upload_profile_picture(user_id: UUID, file: UploadFile = File(...) , db: AsyncSession = Depends(get_db)):
     """
     Upload a profile picture for a specific user and store it in Minio.
 
