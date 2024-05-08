@@ -33,9 +33,30 @@ from app.services.jwt_service import create_access_token
 from app.utils.link_generation import create_user_links, generate_pagination_links
 from app.dependencies import get_settings
 from app.services.email_service import EmailService
+from app.services.minio_service import MinioService 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
+
+@router.post("/users/{user_id}/upload-profile-picture", tags=["User Management"])
+async def upload_profile_picture(user_id: UUID, file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
+    """
+    Upload a profile picture for a specific user and store it in Minio.
+
+    - **user_id**: UUID of the user to upload the profile picture for.
+    - **file**: The profile picture file to upload.
+    """
+    if not await UserService.exists_by_id(db, user_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    url = await MinioService.upload_file(file)  # Assuming MinioService has a method to handle file upload
+    updated_user = await UserService.update_profile_picture_url(db, user_id, url)
+    
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update user profile")
+    
+    return {"url": url}
+
 @router.get("/users/{user_id}", response_model=UserResponse, name="get_user", tags=["User Management Requires (Admin or Manager Roles)"])
 async def get_user(user_id: UUID, request: Request, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
     """
@@ -135,21 +156,7 @@ async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db), token: 
 
 @router.post("/users/", response_model=UserResponse, status_code=status.HTTP_201_CREATED, tags=["User Management Requires (Admin or Manager Roles)"], name="create_user")
 async def create_user(user: UserCreate, request: Request, db: AsyncSession = Depends(get_db), email_service: EmailService = Depends(get_email_service), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
-    """
-    Create a new user.
-
-    This endpoint creates a new user with the provided information. If the email
-    already exists, it returns a 400 error. On successful creation, it returns the
-    newly created user's information along with links to related actions.
-
-    Parameters:
-    - user (UserCreate): The user information to create.
-    - request (Request): The request object.
-    - db (AsyncSession): The database session.
-
-    Returns:
-    - UserResponse: The newly created user's information along with navigation links.
-    """
+    # Check if email or nickname already exists
     existing_user_email = await UserService.get_by_email(db, user.email)
     if existing_user_email:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists")
@@ -157,12 +164,16 @@ async def create_user(user: UserCreate, request: Request, db: AsyncSession = Dep
     existing_user_nickname = await UserService.get_by_nickname(db, user.nickname)
     if existing_user_nickname:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nickname already exists")
-
     
+    # Create the user
     created_user = await UserService.create(db, user.model_dump(), email_service)
     if not created_user:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create user")
     
+    # Handle profile picture upload if included
+    if user.profile_picture:
+        picture_url = await MinioService.upload_file(user.profile_picture)  # Ensure this logic aligns with your actual implementation
+        created_user = await UserService.update_profile_picture_url(db, created_user.id, picture_url)
     
     return UserResponse.model_construct(
         id=created_user.id,
