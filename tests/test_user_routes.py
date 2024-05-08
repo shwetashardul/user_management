@@ -3,7 +3,7 @@ from fastapi import HTTPException, UploadFile
 from unittest.mock import AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from .routers.user_routes import upload_profile_picture  # Adjust import according to your actual path
+from app.routers.user_routes import upload_profile_picture  # Adjust import according to your actual path
 
 @pytest.mark.asyncio
 @patch('path.to.get_db')  # Correct the path according to your project structure
