@@ -6,9 +6,9 @@ from uuid import UUID
 from app.routers.user_routes import upload_profile_picture  # Adjust import according to your actual path
 
 @pytest.mark.asyncio
-@patch('path.to.get_db')  # Correct the path according to your project structure
-@patch('path.to.UserService')  # Correct the path according to your project structure
-@patch('path.to.minio_service')  # Correct the path according to your project structure
+@patch('app.dependencies.get_db')  # Correct the path according to your project structure
+@patch('app.services.user_service.UserService')  # Correct the path according to your project structure
+@patch('app.services.minio_service')  # Correct the path according to your project structure
 async def test_upload_profile_picture_success(mock_minio_service, mock_user_service, mock_get_db):
     # Mock dependencies
     db = AsyncMock(spec=AsyncSession)
@@ -27,8 +27,8 @@ async def test_upload_profile_picture_success(mock_minio_service, mock_user_serv
     mock_user_service.update_profile_picture_url.assert_called_once()
 
 @pytest.mark.asyncio
-@patch('path.to.get_db')  # Adjust the path as needed
-@patch('path.to.UserService')  # Adjust the path as needed
+@patch('app.dependencies.get_db')  # Adjust the path as needed
+@patch('app.services.user_service.UserService')  # Adjust the path as needed
 async def test_upload_profile_picture_user_not_found(mock_user_service, mock_get_db):
     db = AsyncMock(spec=AsyncSession)
     mock_get_db.return_value = db
@@ -41,9 +41,9 @@ async def test_upload_profile_picture_user_not_found(mock_user_service, mock_get
     assert exc_info.value.detail == "User not found"
 
 @pytest.mark.asyncio
-@patch('path.to.get_db')
-@patch('path.to.UserService')
-@patch('path.to.minio_service')
+@patch('app.dependencies.get_db')
+@patch('app.services.user_service.UserService')
+@patch('app.services.minio_service')
 async def test_upload_profile_picture_update_failure(mock_minio_service, mock_user_service, mock_get_db):
     db = AsyncMock(spec=AsyncSession)
     mock_get_db.return_value = db
